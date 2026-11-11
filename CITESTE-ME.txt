@@ -1,0 +1,11 @@
+MAD VISUALS - cum obtii .jar-ul (fara sa instalezi nimic)
+
+1. Mergi pe github.com, fa cont gratuit, New repository (ex: madvisuals).
+2. "uploading an existing file" -> trage TOT continutul acestui zip (inclusiv folderul .github).
+3. Deschide gradle.properties si pune valorile corecte de pe https://fabricmc.net/develop/
+   pentru Minecraft 26.2 (loader_version si fabric_version).
+4. Tab "Actions" -> build -> cand termina, jos la "Artifacts" descarci MadVisuals-jar.
+5. Pune .jar-ul in .minecraft/mods (cu Fabric Loader + Fabric API).
+
+Taste: R=ESP Glow, B=ESP Box, T=Tracers, G=Fullbright, H=Info, C=Zoom (tine apasat).
+Daca build-ul da erori, copiaza-mi textul erorii si repar codul.
