@@ -3,7 +3,7 @@ package madvisuals;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
@@ -19,13 +19,11 @@ public class MadVisuals implements ClientModInitializer {
     public static final int DARK_PURPLE = 0xFF6A0DAD;
 
     public static final Module ESP_GLOW   = new Module("ESP Glow", GLFW.GLFW_KEY_R, true);
-    public static final Module ESP_BOX    = new Module("ESP Box", GLFW.GLFW_KEY_B, true);
-    public static final Module TRACERS    = new Module("Tracers", GLFW.GLFW_KEY_T, false);
     public static final Module FULLBRIGHT = new Module("Fullbright", GLFW.GLFW_KEY_G, false);
     public static final Module INFO       = new Module("Info HUD", GLFW.GLFW_KEY_H, true);
     public static final int ZOOM_KEY = GLFW.GLFW_KEY_C;
 
-    public static final List<Module> MODULES = List.of(ESP_GLOW, ESP_BOX, TRACERS, FULLBRIGHT, INFO);
+    public static final List<Module> MODULES = List.of(ESP_GLOW, FULLBRIGHT, INFO);
     private static final Map<Module, KeyMapping> KEYS = new LinkedHashMap<>();
     private static KeyMapping zoomKey;
 
@@ -35,11 +33,11 @@ public class MadVisuals implements ClientModInitializer {
     public void onInitializeClient() {
         KeyMapping.Category cat = KeyMapping.Category.register(Identifier.parse("madvisuals:main"));
         for (Module m : MODULES) {
-            KEYS.put(m, KeyBindingHelper.registerKeyBinding(
+            KEYS.put(m, KeyMappingHelper.registerKeyMapping(
                 new KeyMapping("key.madvisuals." + m.name.toLowerCase().replace(" ", "_"),
                     InputConstants.Type.KEYSYM, m.key, cat)));
         }
-        zoomKey = KeyBindingHelper.registerKeyBinding(
+        zoomKey = KeyMappingHelper.registerKeyMapping(
             new KeyMapping("key.madvisuals.zoom", InputConstants.Type.KEYSYM, ZOOM_KEY, cat));
 
         ClientTickEvents.END_CLIENT_TICK.register(mc -> {
@@ -57,14 +55,13 @@ public class MadVisuals implements ClientModInitializer {
 
         HudElementRegistry.addLast(Identifier.parse("madvisuals:hud"), (g, delta) -> {
             var mc = Minecraft.getInstance();
-            if (mc.options.hideGui) return;
             var font = mc.font;
 
             String wm = "Mad Visuals";
             int w = font.width(wm);
             g.fill(4, 4, w + 14, 18, 0xAA10001A);
             g.fill(4, 4, 6, 18, PURPLE);
-            g.drawString(font, wm, 10, 7, PURPLE, true);
+            g.text(font, wm, 10, 7, PURPLE, true);
 
             int sw = mc.getWindow().getGuiScaledWidth();
             List<Module> active = new ArrayList<>();
@@ -77,19 +74,17 @@ public class MadVisuals implements ClientModInitializer {
                 int color = lerp(PURPLE, DARK_PURPLE, i / (float) Math.max(1, active.size()));
                 g.fill(sw - tw - 10, y, sw - 2, y + 11, 0x9910001A);
                 g.fill(sw - 3, y, sw - 2, y + 11, color);
-                g.drawString(font, m.name, sw - tw - 6, y + 2, color, true);
+                g.text(font, m.name, sw - tw - 6, y + 2, color, true);
                 y += 11;
             }
 
             if (INFO.enabled && mc.player != null) {
                 int sh = mc.getWindow().getGuiScaledHeight();
-                g.drawString(font, String.format("XYZ: %.1f %.1f %.1f", mc.player.getX(), mc.player.getY(), mc.player.getZ()), 6, sh - 36, PURPLE, true);
-                g.drawString(font, "FPS: " + mc.getFps(), 6, sh - 26, PURPLE, true);
-                g.drawString(font, "Dir: " + mc.player.getDirection().getName(), 6, sh - 16, PURPLE, true);
+                g.text(font, String.format("XYZ: %.1f %.1f %.1f", mc.player.getX(), mc.player.getY(), mc.player.getZ()), 6, sh - 36, PURPLE, true);
+                g.text(font, "FPS: " + mc.getFps(), 6, sh - 26, PURPLE, true);
+                g.text(font, "Dir: " + mc.player.getDirection(), 6, sh - 16, PURPLE, true);
             }
         });
-
-        ESPRenderer.register();
     }
 
     private static int lerp(int a, int b, float t) {
